@@ -1,0 +1,38 @@
+from django.shortcuts import render
+import mysql.connector
+
+def mostrar_datos(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        #hace la conexión a la base de datos
+        try:
+            with mysql.connector.connect(
+                    host='localhost',
+                    port=3306,
+                    user='root',
+                    password='',
+                    db='laboratorio',
+            ) as connection:
+                print("Conexión exitosa")
+
+                #consulta SELECT en la tabla "usuario"
+                cursor = connection.cursor()
+                query = f"SELECT * FROM usuario WHERE username = '{username}' AND password = '{password}'"
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+                # Imprime los resultados de la tabla "usuario"
+                print("Tabla 'usuario':")
+                for row in rows:
+                    print(row)
+
+                #pasa los datos a la plantilla HTML para mostrarlos
+                context = {'rows': rows}
+                return render(request, 'datos.html', context)
+
+        except mysql.connector.Error as error:
+            print("Error en la base de datos:", error)
+
+    return render(request, 'login.html')
